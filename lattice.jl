@@ -64,11 +64,17 @@ mutable struct Lattice
 end
 
 
-function new_lattice(x_min::Int, x_max::Int, y_min::Int, y_max::Int, resolution, Nt, u_l, L_l, ν_l, rho_l, nu)
-    Nx = resolution*(x_max-x_min)
-    Ny = resolution*(y_max-y_min) 
-
-    Re_l = u_l*L_l/ν_l
+function new_lattice(x_min::Int, x_max::Int, y_min::Int, y_max::Int, Cₗ, u_max, Cₜ, Nt, rho, nu)
+    Nx = Cₗ*(x_max-x_min)
+    Ny = Cₗ*(y_max-y_min) 
+    Cᵤ = Cₗ / Cₜ
+    u_l = Cᵤ * u_max
+    Cₚ = rho
+    l_l = 0.1
+    Cᵥ = Cᵤ * Cₗ
+    ν_l = nu*Cᵥ
+    rho_l = Cₚ/rho
+    Re_l = u_l*l_l/ν_l
     println("Reynolds number = ", Re_l)
     
     ### for stability reasons the "magic parameter" is fixed at 0.4, with stability analysis this could be changed 
@@ -87,7 +93,7 @@ function new_lattice(x_min::Int, x_max::Int, y_min::Int, y_max::Int, resolution,
     rho_prot = zeros(Ny)
     l_prot = zeros(Ny, Nx)
 
-    L = Lattice(Nx, Ny, 9, u_l, L_l, ν_l, Re_l, rho_l, 1/sqrt(3), Nt, lam, om_p, om_m, cx, cy, w, f_prot, f_prot, f_prot, f_prot, f_prot, f_prot, u_h, u_h,
+    L = Lattice(Nx, Ny, 9, u_l, l_l, ν_l, Re_l, rho_l, 1/sqrt(3), Nt, lam, om_p, om_m, cx, cy, w, f_prot, f_prot, f_prot, f_prot, f_prot, f_prot, u_h, u_h,
                u_v, u_v, rho_prot, rho_prot, zeros(3), ones(Ny, Nx), l_prot, l_prot)
     
     return L

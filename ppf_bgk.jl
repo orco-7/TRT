@@ -2,8 +2,8 @@ include("lib.jl")
 using Plots
 
 function ppf()
-    #function new_lattice(x_min::Int, x_max::Int, y_min::Int, y_max::Int, resolution, Nt, u_l, L_l, ν_l, rho_l, nu)
-    L = new_lattice(0, 5, 0, 52, 10, 100, 0.1, 1, 0.1, 1, 3/10)#10^(-5))
+    #function new_lattice(x_min::Int, x_max::Int, y_min::Int, y_max::Int, Cₗ, u_max, Cₜ, Nt, rho, nu)
+    L = new_lattice(0, 52, 0, 5, 10, 10, 10, 100, 1000, 10^(-5))
     L = initialize_lattice!(L)
     
 
