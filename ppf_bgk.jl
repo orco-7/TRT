@@ -3,13 +3,22 @@ using Plots
 
 function ppf()
     #function new_lattice(x_min::Int, x_max::Int, y_min::Int, y_max::Int, resolution, Nt, u_l, L_l, ν_l, rho_l, nu)
-    L = new_lattice(0, 5, 0, 2, 150, 500, 0.001, 1, 0.1, 1, 3/10)#10^(-5))
+    L = new_lattice(0, 5, 0, 52, 10, 100, 0.1, 1, 0.1, 1, 3/10)#10^(-5))
     L = initialize_lattice!(L)
     
 
     anim = @animate for i in 1:L.Nt
     
         L.ρ, L.u, L.v = @inbounds compute_macro(L.f, L.cx, L.cy)
+        if i > 1
+            L.u_right[:, 1] = L.u[:, end]
+            #L.u_right[:, 2] = L.v[:, end]
+            L.u_left[:, 1] = L.u[:, 1]
+            #L.u_left[:, 2] = L.v[:, 1]
+            L.ρ_left[:] = L.ρ[:, 1]
+            L.ρ_right[:] = L.ρ[:, end]
+        end
+
         L.v = zeros(size(L.u))
         L.fₑ = @inbounds equilibrium(L.u, L.v, L.cx, L.cy, L.w, L.ρ)
         #println(L.f)
@@ -21,7 +30,7 @@ function ppf()
         #readline()
     
         println("Iteration n°: ", i)
-        L.f = @inbounds collision(L.f, L.f⁺, L.fₑ⁺, L.ω⁺, L.ω⁻, L.f⁻, L.fₑ⁻ )
+        L.f = @inbounds collision_bgk(L.f, L.ω⁺, L.fₑ)
         println("collision done")
         L.f = @inbounds streaming(L.f)
         println("streaming done")
@@ -76,15 +85,15 @@ function initialize_lattice!(L::Lattice)
     
     L.boundary = add_north_wall!(L.boundary, L.Nx)
     L.boundary = add_south_wall!(L.boundary, L.Nx, L.Ny)
-    
-    L.ρ_left = 1.35 .* ones(L.Ny)
+    L.ω⁺ = 0.6
+    L.ρ_left = 1.05 .* ones(L.Ny)
     L.ρ_right = ones(L.Ny)
-    L.u_left = 0.001*ones(L.Ny, 2)
+    L.u_left = 0.1*ones(L.Ny, 2)
     L.u_left[:, 2] = zeros(L.Ny)
     for i in 1:L.Ny
         L.u_left[i, 1] = 4L.uₗ * (i/L.Ny - (i/L.Ny)^2)
     end
-    L.u_right = 0.001*ones(L.Ny, 2)
+    L.u_right = 0.1*ones(L.Ny, 2)
     L.u_right[:, 2] = zeros(L.Ny)
     L.u_top = zeros(L.Nx, 2)
     L.u_bottom = zeros(L.Nx, 2)

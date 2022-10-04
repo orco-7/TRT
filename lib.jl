@@ -66,6 +66,16 @@ function equilibrium(u, v, cx, cy, w, ρ)
     ######### OKAY 
 end
 
+#### this function computes collision with the BGK operator, it uses the same lattice with tau = ω⁺
+function collision_bgk(f, ω, fₑ)
+    f_temp = zeros(size(f))
+    ω_ = 1 - ω
+    for i in 1:size(f_temp)[3]
+        f_temp[:, :, i] = f[:, :, i] .* ω_ .+ fₑ[:, :, i].*ω
+    end
+    return f_temp
+end
+
 ### computes collision with the TRT operator 
 function collision(f, f⁺, fₑ⁺, ω⁺, ω⁻, f⁻, fₑ⁻ )
     
@@ -131,9 +141,13 @@ end
 
 ### periodic boundary conditions 
 function periodic_boundary(f)
-    f[:, 1, 7] = f[:, end, 6]
-    f[:, 1, 3] = f[:, end, 2] 
-    f[:, 1, 8] = f[:, end, 9]
+    f[:, 1, 6] = f[:, end, 6]
+    f[:, 1, 2] = f[:, end, 2] 
+    f[:, 1, 9] = f[:, end, 9]
+
+    f[:, end, 7] = f[:, 1, 7]
+    f[:, end, 3] = f[:, 1, 3]
+    f[:, end, 8] = f[:, 1, 8]
     return f  
 end
 
